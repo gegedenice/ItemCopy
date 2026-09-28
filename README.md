@@ -1,27 +1,44 @@
-# ItemCopy Module for Omeka S
+# Item Copy for Omeka S
 
-This module allows logged users in the Admin Dashbord to quickly make a duplicate operation on resources, which could be helpful when a lot of items are very similar.  
-Once installed and activated, the module adds a new button in the actions list in the browse View. Clicking this button will copy and paste in a new item all properties, class, modele... of the selected item.  
+Item Copy adds a **Copy item** action to every row of the administrative item
+browse page. The copy contains the source item's metadata, resource class,
+resource template, item sets and visibility. Media are deliberately not copied.
 
-![Image of Dasboard](screenshot.png)
+After creating the copy, the module opens its edit page so it can be reviewed
+before further use.
+
+## Requirements
+
+- Omeka S 3.x or 4.x
+- PHP 7.4 or later
 
 ## Installation
 
-See general end user documentation for [Installing a module](https://omeka.org/s/docs/user-manual/modules/#installing-modules)
+1. Download the release archive and extract it into the Omeka S `modules`
+   directory.
+2. Make sure the directory is named `ItemCopy`.
+3. In the Omeka S administrative interface, open **Modules** and install
+   **Item Copy**.
 
-## How it works ?
-
-It works with Ajax calls to the REST API of the Omeka S installation which transports item's datas in JSON-LD format.  
-One call is a GET one to make a READ API operation on the selected resource's data (GET /api/items/:id), the JSON-LD response is passed to a POST call fot creating a new resource (POST /api/items)
-
+See the [Omeka S module installation documentation](https://omeka.org/s/docs/user-manual/modules/#installing-modules)
+for general installation guidance.
 
 ## Usage
 
-A few parameters need to be customized directly in the asset/item-copy.js file (starting lines of the file)   
-* The key_identity and key_credential parameters : to perform a GET operation on a non-public resource or/and a POST operation to create a new resource, the API requests must be authentified with key_identity and key_credantial parameters. These 2 parameters are given for admin user by activating an API Key in the API keys tab of their user edit page.
+Open **Resources > Items**, then select the copy icon in an item's action list.
+Confirm the operation. The normal Omeka S authorization rules apply: a user can
+only read and create resources allowed by their role.
 
+No API keys or source-code configuration are needed. Copying is performed on
+the server with the logged-in user's session and a CSRF-protected POST request;
+credentials are never stored in browser assets.
 
-## Todo
+## Upgrade from 1.x
 
-- [ ] Add a filter to the GET API response to get only the properties of each Item, and not the media ressources or the item set for example
-- [ ] Use the session credentials to avoid config (see [omeka/omeka-s#1613](https://github.com/omeka/omeka-s/issues/1613)).
+Remove any API credentials previously entered in `asset/item-copy.js`. Version
+2.0 no longer uses them. Replace the complete module directory when upgrading,
+then confirm that Omeka S reports version 2.0.0 on the Modules page.
+
+## License
+
+WTFPL. See [LICENCE.md](LICENCE.md).
