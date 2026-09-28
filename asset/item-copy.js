@@ -1,51 +1,46 @@
-$( document ).ready(function() {
+(function () {
+    'use strict';
 
-    /* User key_identity and key_credential, activate the API keys tab of the user edit page to get them */
-    var keyIdentity = 'TGxoqd9wlnyjfig3QIxfLxHuiLY83qlM';
-    var keyCredential = 'mmeM3Lc9L1B3Petjj9YZ7g71SQ7tLvFQ';
-
-    var url = window.location.href;
-    var urlAdmin = url.split("/admin/item")[0];
-
-    $(".tablesaw-cell-content").each(function() {
-        var itemId =  $(this).children("input").attr("value");
-        $(this).children("ul").prepend('<li><a class="o-icon-add item-copy" href="" title="Copy this Resource" aria-label="Copy this Resource" data-url="'+urlAdmin+'/api/items/'+itemId+'"></a></li>');
-    });
-
-    $('.item-copy').click(function(e){
-        e.preventDefault();
-
-        if (keyIdentity === 'your_key_identity' || keyCredential === 'your_key_credential') {
-            alert('You should set your credential keys to copy an item.');
+    document.addEventListener('DOMContentLoaded', function () {
+        var config = window.ItemCopy;
+        if (!config) {
             return;
         }
 
-        $.ajax({
-            "async": true,
-            "crossDomain": true,
-            "url": $(this).data('url'),
-            "method": "GET",
-            "headers": {
-                "content-type": "application/json",
+        document.querySelectorAll('table tbody tr').forEach(function (row) {
+            var checkbox = row.querySelector('input[name="resource_ids[]"]');
+            var actions = row.querySelector('ul.actions');
+
+            if (!checkbox || !actions || actions.querySelector('.item-copy')) {
+                return;
             }
-        })
-        .done(function (response) {
-            var content = response;
-            $.ajax({
-                "async": true,
-                "crossDomain": true,
-                "url": urlAdmin + "/api/items?key_identity=" + keyIdentity + "&key_credential=" + keyCredential,
-                "method": "POST",
-                "headers": {
-                    "content-type": "application/json",
-                },
-                "data": JSON.stringify(content),
-            })
-            .done(function (response) {
-                alert('Resource successfully copied !');
-                window.location.href = urlAdmin+"/admin/item";
+
+            var item = document.createElement('li');
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'o-icon-add item-copy';
+            button.title = config.copyLabel;
+            button.setAttribute('aria-label', config.copyLabel);
+            button.addEventListener('click', function () {
+                if (!window.confirm(config.confirmMessage)) {
+                    return;
+                }
+
+                var form = document.createElement('form');
+                var csrf = document.createElement('input');
+                form.method = 'post';
+                form.action = config.action.replace('__ITEM_ID__', checkbox.value);
+                form.hidden = true;
+                csrf.type = 'hidden';
+                csrf.name = 'csrf';
+                csrf.value = config.csrf;
+                form.appendChild(csrf);
+                document.body.appendChild(form);
+                form.submit();
             });
+
+            item.appendChild(button);
+            actions.insertBefore(item, actions.firstChild);
         });
     });
-
-});
+}());
